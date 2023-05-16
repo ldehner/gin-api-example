@@ -2,32 +2,48 @@ package userroutes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gofiber/fiber/v2"
 	requestmodels "github.com/ldehner/fiber-rental-api/models/request"
+	storemodels "github.com/ldehner/fiber-rental-api/models/store"
 )
 
 func CreateUser(c *gin.Context) {
-	return
+	var user requestmodels.User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(400, gin.H{
+			"message": err.Error(),
+		})
+	}
+	storeUser := CreateStoreUser(user)
+	// do something with storeUser
+	returnUser := CreateResponseUser(storeUser)
+	c.JSON(200, gin.H{
+		"user": returnUser,
+	})
 }
 
 func GetUser(c *gin.Context) {
-	id := c.Params("id")
-	user, err := conf.Conf{}.GetUserRepository().GetUser(id)
-	if err != nil {
-		return c.Status(fiber.StatusConflict).SendString(err.Error())
-	}
-	user.Id = id
-	return c.Status(fiber.StatusFound).JSON(CreateResponseUser(user))
+	id := c.Param("id")
+	// get user from db
+	storeUser := storemodels.User{}
+	storeUser.Id = id
+	returnUser := CreateResponseUser(storeUser)
+	c.JSON(200, gin.H{
+		"user": returnUser,
+	})
 }
 
 func UpdateUser(c *gin.Context) {
+	id := c.Param("id")
 	var user requestmodels.User
-	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusConflict).SendString(err.Error())
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(400, gin.H{
+			"message": "user " + id,
+		})
 	}
-	dbuser, err := conf.Conf{}.GetUserRepository().UpdateUser(CreateStoreUser(user))
-	if err != nil {
-		return c.Status(fiber.StatusConflict).SendString(err.Error())
-	}
-	return c.Status(fiber.StatusOK).JSON(CreateResponseUser(dbuser))
+	// update User in db
+	storeUser := CreateStoreUser(user)
+	returnUser := CreateResponseUser(storeUser)
+	c.JSON(200, gin.H{
+		"user": returnUser,
+	})
 }

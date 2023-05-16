@@ -20,4 +20,6 @@ func main() {
 func setupRoutes(r *gin.Engine) {
 	// user endpoints
 	r.GET("/user/:id", userroutes.GetUser)
+	r.PUT("/user/:id", userroutes.UpdateUser)
+	r.POST("/user", userroutes.CreateUser)
 }
